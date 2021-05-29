@@ -1,3 +1,4 @@
+from .interpreter import Interpreter
 from .lexer import Lexer
 from .parser import Parser
 
@@ -9,6 +10,10 @@ def run(fn, code):
     # Generate abstract syntax tree.
     parser = Parser(tok)
     ast = parser.parse()
-
     if ast.error: return ast.error
-    return ast.node
+
+    # Run program using interpreter
+    interpreter = Interpreter()
+    res = interpreter.visit(ast.node)
+
+    return res
