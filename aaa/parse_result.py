@@ -12,7 +12,6 @@ class ParseResult:
         
         return res
 
-
     def success(self, node):
         self.node = node
         return self

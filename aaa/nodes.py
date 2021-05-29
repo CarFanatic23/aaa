@@ -17,3 +17,12 @@ class BinOpNode:
 
     def __repr__(self):
         return f'({self.left}, {self.op_tok}, {self.right})'
+
+class UnaryOpNode:
+    def __init__(self, op_tok, node):
+        '''Unary operation node.'''
+        self.op_tok = op_tok
+        self.node = node
+
+    def __repr__(self):
+        return f'({self.op_tok}, {self.node})'
