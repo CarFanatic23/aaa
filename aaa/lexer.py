@@ -14,7 +14,7 @@ class Lexer:
 
     def advance(self):
         '''Advance to next character.'''
-        self.pos.advance(self.curr)
+        self.pos.advance()
         self.curr = self.code[self.pos.idx] if self.pos.idx < len(self.code) else None
 
     def make_tokens(self):
@@ -29,31 +29,33 @@ class Lexer:
                 tokens.append(self.make_number())
                 continue
             elif self.curr == '+':
-                tokens.append(Token(TT_PLUS))
+                tokens.append(Token(TT_PLUS, pos_start=self.pos))
             elif self.curr == '-':
-                tokens.append(Token(TT_MINUS))
+                tokens.append(Token(TT_MINUS, pos_start=self.pos))
             elif self.curr == '*':
-                tokens.append(Token(TT_MUL))
+                tokens.append(Token(TT_MUL, pos_start=self.pos))
             elif self.curr == '/':
-                tokens.append(Token(TT_DIV))
+                tokens.append(Token(TT_DIV, pos_start=self.pos))
             elif self.curr == '(':
-                tokens.append(Token(TT_LPAREN))
+                tokens.append(Token(TT_LPAREN, pos_start=self.pos))
             elif self.curr == ')':
-                tokens.append(Token(TT_RPAREN))
+                tokens.append(Token(TT_RPAREN, pos_start=self.pos))
             else:
                 char = self.curr
                 pos_start = self.pos.copy()
                 self.advance()
-                return IllegalCharError(pos_start, self.pos, f'`{char}`')
+                return None, IllegalCharError(pos_start, self.pos, f'`{char}`')
 
             self.advance()
 
-        return tokens
+        tokens.append(Token(TT_EOF, pos_start=self.pos))
+        return tokens, None
 
     def make_number(self):
         '''Makes number.'''
         num = ''
         dots = 0
+        pos_start = self.pos.copy()
 
         while self.curr != None and self.curr in string.digits + '.':
             if self.curr == '.':
@@ -66,6 +68,6 @@ class Lexer:
             self.advance()
 
         if dots == 0:
-            return Token(TT_INT, int(num))
+            return Token(TT_INT, int(num), pos_start, self.pos)
         else:
-            return Token(TT_FLOAT, float(num))
+            return Token(TT_FLOAT, float(num), pos_start, self.pos)

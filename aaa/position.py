@@ -8,11 +8,11 @@ class Position:
         self.fn = fn
         self.fc = fc
 
-    def advance(self, curr):
+    def advance(self, curr = None):
         '''Advance to next position.'''
         self.idx += 1
         self.col += 1 if curr != '\n' else -self.col
-        # ^ add 1 if `curr` is not a new line char else add negative of `self.col` which resets `self.col` to 0
+        # ^ add 1 if `curr` is not a new line else add negative of `self.col` which resets `self.col` to 0
         self.ln += 0 if curr != '\n' else 1
 
         return self
