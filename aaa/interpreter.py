@@ -35,6 +35,8 @@ class Interpreter:
             result = left.mul(right)
         elif node.op_tok.type == TT_DIV:
             result, err = left.div(right)
+        elif node.op_tok.type == TT_POW:
+            result = left.pow(right)
 
         if err: return res.failure(err)
         return res.success(

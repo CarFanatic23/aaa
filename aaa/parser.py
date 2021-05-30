@@ -39,7 +39,15 @@ class Parser:
             factor = res.register(self.factor())
             if res.error: return res
             return res.success(UnaryOpNode(tok, factor))
-        elif tok.type in [TT_INT, TT_FLOAT]:
+
+        return self.power()
+
+    def atom(self):
+        '''Atom.'''
+        res = ParseResult()
+        tok = self.curr
+
+        if tok.type in [TT_INT, TT_FLOAT]:
             res.register(self.advance())
             return res.success(NumberNode(tok))
         elif tok.type == TT_LPAREN:
@@ -56,7 +64,13 @@ class Parser:
                     "Expected ')'."
                 ))
 
-        return res.failure(InvalidSyntaxError(tok.pos_start, tok.pos_end, 'Expected int or float.'))
+        return res.failure(InvalidSyntaxError(
+            tok.pos_start, tok.pos_end,
+            'Expected int, float, "+", "-" or "("'))
+
+    def power(self):
+        '''Power.'''
+        return self.bin_op(self.atom, [TT_POW], self.factor)
 
     def term(self):
         '''Term.'''
@@ -66,8 +80,9 @@ class Parser:
         '''Expression.'''
         return self.bin_op(self.term, [TT_PLUS, TT_MINUS])
 
-    def bin_op(self, func, op_toks):
+    def bin_op(self, func, op_toks, func_r = None):
         '''Binary operation.'''
+        if not func_r: func_r = func
         res = ParseResult()
         left = res.register(func())
         if res.error: return res
@@ -75,7 +90,7 @@ class Parser:
         while self.curr.type in op_toks:
             op_tok = self.curr
             res.register(self.advance())
-            right = res.register(func())
+            right = res.register(func_r())
             if res.error: return res
             left = BinOpNode(left, op_tok, right)
 

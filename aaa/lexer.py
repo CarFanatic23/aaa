@@ -36,6 +36,8 @@ class Lexer:
                 tokens.append(Token(TT_MUL, pos_start=self.pos))
             elif self.curr == '/':
                 tokens.append(Token(TT_DIV, pos_start=self.pos))
+            elif self.curr == '^':
+                tokens.append(Token(TT_POW, pos_start=self.pos))
             elif self.curr == '(':
                 tokens.append(Token(TT_LPAREN, pos_start=self.pos))
             elif self.curr == ')':
