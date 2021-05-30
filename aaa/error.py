@@ -32,6 +32,7 @@ class RuntimeError(Error):
         super().__init__(pos_start, pos_end, 'RuntimeError', details)
     
     def gen_traceback(self):
+        '''Generates function call traceback.'''
         res = 'Traceback (most recent call last):\n'
         pos = self.pos_start
         context = self.context
