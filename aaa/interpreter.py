@@ -1,39 +1,57 @@
 # Interpreter
 from .types import *
 from .token import *
+from .rt_result import RuntimeResult
 
 class Interpreter:
-    def visit(self, node):
+    def visit(self, node, context):
         '''Process the node and it's children.'''
         name = f'visit_{type(node).__name__}'
         method = getattr(self, name)
-        return method(node)
+        return method(node, context)
 
-    def visit_NumberNode(self, node):
+    def visit_NumberNode(self, node, context):
         '''Visit number node.'''
-        return Number(node.tok.value).set_pos(node.pos_start, node.pos_end)
+        return RuntimeResult().success(
+            Number(node.tok.value).set_context(
+                context
+            ).set_pos(node.pos_start, node.pos_end)
+        )
 
-    def visit_BinOpNode(self, node):
+    def visit_BinOpNode(self, node, context):
         '''Visit binary operation node and it's children.'''
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        res = RuntimeResult()
+        left = res.register(self.visit(node.left, context))
+        if res.error: return res
+        right = res.register(self.visit(node.right, context))
+        if res.error: return res
 
+        err = None
         if node.op_tok.type == TT_PLUS:
-            res = left.add(right)
+            result = left.add(right)
         elif node.op_tok.type == TT_MINUS:
-            res = left.sub(right)
+            result = left.sub(right)
         elif node.op_tok.type == TT_MUL:
-            res = left.mul(right)
+            result = left.mul(right)
         elif node.op_tok.type == TT_DIV:
-            res = left.div(right)
+            result, err = left.div(right)
 
-        return res.set_pos(node.pos_start, node.pos_end)
+        if err: return res.failure(err)
+        return res.success(
+            result.set_pos(node.pos_start, node.pos_end)
+        )
 
-    def visit_UnaryOpNode(self, node):
+    def visit_UnaryOpNode(self, node, context):
         '''Visit unary operation node and it's children.'''
-        num = self.visit(node.node)
+        res = RuntimeResult()
+        num = res.register(self.visit(node.node, context))
+        if res.error: return res
 
+        err = None
         if node.op_tok.type == TT_MINUS:
-            num = num.mul(Number(-1))
+            num, err = num.mul(Number(-1))
 
-        return num.set_pos(node.pos_start, node.pos_end)
+        if err: return res.failure(err)
+        return res.success(
+            num.set_pos(node.pos_start, node.pos_end)
+        )

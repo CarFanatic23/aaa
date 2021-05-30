@@ -23,3 +23,25 @@ class InvalidSyntaxError(Error):
     def __init__(self, pos_start, pos_end, details):
         '''Illegal syntax error.'''
         super().__init__(pos_start, pos_end, 'InvalidSyntaxError', details)
+
+# Runtime error
+class RuntimeError(Error):
+    def __init__(self, pos_start, pos_end, details, context):
+        '''Runtime error.'''
+        self.context = context
+        super().__init__(pos_start, pos_end, 'RuntimeError', details)
+    
+    def gen_traceback(self):
+        res = 'Traceback (most recent call last):\n'
+        pos = self.pos_start
+        context = self.context
+
+        while context:
+            res += f'    File "{pos.fn}", Line {pos.ln + 1}, in {context.display_name}\n'
+            pos = context.parent_en_pos
+            context = context.parent
+
+        return res
+
+    def __repr__(self):
+        return f'{self.gen_traceback()}{self.name}: {self.details}'
