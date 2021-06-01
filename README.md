@@ -4,7 +4,7 @@ aaa is a programming language currently being developed by me.
 
 # Todo
 - [ ] strings
-- [ ] variables
+- [x] variables
 - [ ] functions
 - [ ] booleans
 - [ ] if statements

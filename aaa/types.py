@@ -39,7 +39,7 @@ class Number:
                 self.value * other_num.value
             ).set_context(self.context)
 
-    def pow(self, other_num):
+    def power(self, other_num):
         '''Exponent by another number.'''
         if isinstance(other_num, Number):
             return Number(

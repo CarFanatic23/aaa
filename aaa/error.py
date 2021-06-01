@@ -21,7 +21,7 @@ class IllegalCharError(Error):
 # Invalid syntax error
 class InvalidSyntaxError(Error):
     def __init__(self, pos_start, pos_end, details):
-        '''Illegal syntax error.'''
+        '''Invalid syntax error.'''
         super().__init__(pos_start, pos_end, 'InvalidSyntaxError', details)
 
 # Runtime error

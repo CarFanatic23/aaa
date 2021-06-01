@@ -2,6 +2,9 @@ from .interpreter import Interpreter
 from .lexer import Lexer
 from .parser import Parser
 from .context import Context
+from .symbol_table import SymbolTable
+
+glob_sym_table = SymbolTable()
 
 def run(fn, code):
     lexer = Lexer(fn, code)
@@ -16,6 +19,7 @@ def run(fn, code):
     # Run program using interpreter
     interpreter = Interpreter()
     context = Context('<program>')
+    context.sym_table = glob_sym_table
     res = interpreter.visit(ast.node, context)
 
     if res.error: return res.error

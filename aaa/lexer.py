@@ -28,6 +28,9 @@ class Lexer:
             elif self.curr in string.digits:
                 tokens.append(self.make_number())
                 continue
+            elif self.curr in string.ascii_letters:
+                tokens.append(self.make_id())
+                continue
             elif self.curr == '+':
                 tokens.append(Token(TT_PLUS, pos_start=self.pos))
             elif self.curr == '-':
@@ -38,6 +41,8 @@ class Lexer:
                 tokens.append(Token(TT_DIV, pos_start=self.pos))
             elif self.curr == '^':
                 tokens.append(Token(TT_POW, pos_start=self.pos))
+            elif self.curr == '=':
+                tokens.append(Token(TT_EQ, pos_start=self.pos))
             elif self.curr == '(':
                 tokens.append(Token(TT_LPAREN, pos_start=self.pos))
             elif self.curr == ')':
@@ -73,3 +78,16 @@ class Lexer:
             return Token(TT_INT, int(num), pos_start, self.pos)
         else:
             return Token(TT_FLOAT, float(num), pos_start, self.pos)
+
+    def make_id(self):
+        '''Identifier.'''
+        id_str = ''
+        pos_start = self.pos.copy()
+        allowed_chars = string.digits + string.ascii_letters + '_'
+
+        while self.curr != None and self.curr in allowed_chars:
+            id_str += self.curr
+            self.advance()
+            
+        tok_type = TT_KEYWORD if id_str in KEYWORDS else TT_IDENTIFIER
+        return Token(tok_type, id_str, pos_start, self.pos)

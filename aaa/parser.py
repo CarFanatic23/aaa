@@ -16,7 +16,7 @@ class Parser:
             return res.failure(InvalidSyntaxError(
                 self.curr.pos_start,
                 self.curr.pos_end,
-                "Expected '+', '-', '*' or '/'.")
+                'Expected "+", "-", "*" or "/".')
             )
 
         return res
@@ -35,7 +35,7 @@ class Parser:
         tok = self.curr
 
         if tok.type in [TT_PLUS, TT_MINUS]:
-            res.register(self.advance())
+            res.register_advance()
             factor = res.register(self.factor())
             if res.error: return res
             return res.success(UnaryOpNode(tok, factor))
@@ -48,15 +48,22 @@ class Parser:
         tok = self.curr
 
         if tok.type in [TT_INT, TT_FLOAT]:
-            res.register(self.advance())
+            res.register_advance()
+            self.advance()
             return res.success(NumberNode(tok))
+        elif tok.type == TT_IDENTIFIER:
+            res.register_advance()
+            self.advance()
+            return res.success(VarAccessNode(tok))
         elif tok.type == TT_LPAREN:
-            res.register(self.advance())
+            res.register_advance()
+            self.advance()
             expr = res.register(self.expr())
             if res.error: return res
             
             if self.curr.type == TT_RPAREN:
-                res.register(self.advance())
+                res.register_advance()
+                self.advance()
                 return res.success(expr)
             else:
                 return res.failure(InvalidSyntaxError(
@@ -66,7 +73,7 @@ class Parser:
 
         return res.failure(InvalidSyntaxError(
             tok.pos_start, tok.pos_end,
-            'Expected int, float, "+", "-" or "("'))
+            'Expected int, float, identifier, "+", "-" or "("'))
 
     def power(self):
         '''Power.'''
@@ -78,19 +85,53 @@ class Parser:
 
     def expr(self):
         '''Expression.'''
-        return self.bin_op(self.term, [TT_PLUS, TT_MINUS])
-
-    def bin_op(self, func, op_toks, func_r = None):
-        '''Binary operation.'''
-        if not func_r: func_r = func
         res = ParseResult()
-        left = res.register(func())
+        if self.curr.equals(TT_KEYWORD, 'set'):
+            res.register_advance()
+            self.advance()
+
+            if self.curr.type != TT_IDENTIFIER:
+                return res.failure(InvalidSyntaxError(
+                    self.curr.pos_start, self.curr.pos_end,
+                    'Expected identifier.'
+                ))
+
+            name = self.curr
+            res.register_advance()
+            self.advance()
+
+            if self.curr.type != TT_EQ:
+                return res.failure(InvalidSyntaxError(
+                    self.curr.pos_start, self.curr.pos_end,
+                    'Expected "=".'
+                ))
+
+            res.register_advance()
+            self.advance()
+            expr = res.register(self.expr())
+            if res.error: return res
+            return res.success(VarAssignNode(name, expr))
+
+        node = res.register(self.bin_op(self.term, [TT_PLUS, TT_MINUS]))
+        if res.error:
+            return res.failure(InvalidSyntaxError(
+                self.curr.pos_start, self.curr.pos_end,
+                'Expected "set", int, float, identifier, "+", "-" or "("'))
+
+        return res.success(node)
+
+    def bin_op(self, left_func, op_toks, right_func = None):
+        '''Binary operation.'''
+        if not right_func: right_func = left_func
+        res = ParseResult()
+        left = res.register(left_func())
         if res.error: return res
 
         while self.curr.type in op_toks:
             op_tok = self.curr
-            res.register(self.advance())
-            right = res.register(func_r())
+            res.register_advance()
+            self.advance()
+            right = res.register(right_func())
             if res.error: return res
             left = BinOpNode(left, op_tok, right)
 

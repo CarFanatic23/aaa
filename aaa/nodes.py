@@ -32,3 +32,18 @@ class UnaryOpNode:
 
     def __repr__(self):
         return f'({self.op_tok}, {self.node})'
+
+class VarAssignNode:
+    def __init__(self, tok, value_node):
+        '''Variable assignment node.'''
+        self.tok = tok
+        self.value_node = value_node
+        self.pos_start = tok.pos_start
+        self.pos_end = value_node.pos_end
+
+class VarAccessNode:
+    def __init__(self, tok):
+        '''Variable access node.'''
+        self.tok = tok
+        self.pos_start = tok.pos_start
+        self.pos_end = tok.pos_end

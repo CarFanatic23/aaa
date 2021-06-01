@@ -5,3 +5,4 @@ class Context:
         self.display_name = display_name
         self.parent = parent
         self.parent_en_pos = parent_en_pos
+        self.sym_table = None

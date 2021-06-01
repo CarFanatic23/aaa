@@ -36,7 +36,7 @@ class Interpreter:
         elif node.op_tok.type == TT_DIV:
             result, err = left.div(right)
         elif node.op_tok.type == TT_POW:
-            result = left.pow(right)
+            result = left.power(right)
 
         if err: return res.failure(err)
         return res.success(
@@ -57,3 +57,28 @@ class Interpreter:
         return res.success(
             num.set_pos(node.pos_start, node.pos_end)
         )
+
+    def visit_VarAccessNode(self, node, context):
+        '''Visit variable access node.'''
+        res = RuntimeResult()
+        name = node.tok.value
+        value = context.sym_table.get(name)
+
+        if not value:
+            return res.failure(RuntimeError(
+                node.pos_start, node.pos_end,
+                f'"{name}" is not defined.',
+                context
+            ))
+
+        return res.success(value)
+
+    def visit_VarAssignNode(self, node, context):
+        '''Visit variable assign node.'''
+        res = RuntimeResult()
+        name = node.tok.value
+        value = res.register(self.visit(node.value_node, context))
+        if res.error: return res
+
+        context.sym_table.set_var(name, value)
+        return res.success(value)
