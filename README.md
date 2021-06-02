@@ -8,9 +8,11 @@ aaa is a programming language currently being developed by me.
 3. run main.py using python
 
 # Todo
+- [ ] types
 - [ ] strings
+- [ ] booleans
 - [x] variables
 - [ ] functions
-- [ ] booleans
 - [ ] if statements
 - [ ] for and while loops
+- [ ] logical operators
